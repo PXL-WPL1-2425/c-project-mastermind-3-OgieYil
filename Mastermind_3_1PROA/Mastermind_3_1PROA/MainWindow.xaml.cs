@@ -488,6 +488,7 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
             }
         }
 
+
         // Update de waarde van een ComboBox
         private void UpdateComboBox(int index, string value)
         {
