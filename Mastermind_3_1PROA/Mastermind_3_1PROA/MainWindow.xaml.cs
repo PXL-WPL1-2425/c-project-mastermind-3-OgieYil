@@ -372,5 +372,133 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
                 MessageBox.Show("Ongeldig aantal pogingen ingevoerd.", "Fout");
             }
         }
+
+        private const int MaxPenaltyPoints = 100; // Limiet voor strafpunten
+        private int penaltyPoints = 0; // Strafpunten variabele voor de huidige speler
+
+        // Start een nieuwe spelerbeurt en reset de strafpunten
+        private void StartNewPlayerTurn()
+        {
+            penaltyPoints = 0; // Reset de strafpunten naar 0
+            MessageBox.Show("Nieuwe speler aan de beurt! Strafpunten zijn gereset.", "Nieuwe Beurt");
+        }
+
+        // Event om de beurt te wisselen naar de volgende speler
+        private void NextPlayerButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartNewPlayerTurn(); // Reset de strafpunten voor de nieuwe speler
+            ResetGameBoard();     // Optioneel: Reset het bord voor de nieuwe speler
+        }
+
+        // Hint Button Click Event
+        private void HintButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Controleer of de strafpuntenlimiet wordt overschreden vóór de hintoptie
+            if (penaltyPoints >= MaxPenaltyPoints)
+            {
+                MessageBox.Show($"Je kunt geen hints meer kopen, want je hebt {MaxPenaltyPoints} of meer strafpunten bereikt!", "Limiet Bereikt");
+                return; // Stop hier als limiet is bereikt
+            }
+
+            // Vraag de gebruiker welke hint ze willen
+            MessageBoxResult result = MessageBox.Show(
+                "Kies een hint:\n" +
+                "1. Juiste kleur, verkeerde plaats (kost 15 strafpunten).\n" +
+                "2. Juiste kleur en juiste plaats (kost 25 strafpunten).",
+                "Hint Opties",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Question,
+                MessageBoxResult.No);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                if (penaltyPoints + 15 > MaxPenaltyPoints)
+                {
+                    MessageBox.Show("Je hebt niet genoeg strafpunten om deze hint te kopen!", "Limiet Bereikt");
+                    return;
+                }
+                penaltyPoints += 15;
+                ShowCorrectColorWrongPosition();
+            }
+            else if (result == MessageBoxResult.No)
+            {
+                if (penaltyPoints + 25 > MaxPenaltyPoints)
+                {
+                    MessageBox.Show("Je hebt niet genoeg strafpunten om deze hint te kopen!", "Limiet Bereikt");
+                    return;
+                }
+                penaltyPoints += 25;
+                ShowCorrectColorRightPosition();
+            }
+
+            // Toon bijgewerkte strafpunten aan de gebruiker
+            MessageBox.Show($"Strafpunten: {penaltyPoints}", "Hint Resultaat");
+        }
+
+        // Hint: juiste kleur, verkeerde plaats
+        private void ShowCorrectColorWrongPosition()
+        {
+            Random random = new Random();
+            int correctIndex = random.Next(0, 4); // Kies een willekeurige index
+            int wrongIndex;
+
+            do
+            {
+                wrongIndex = random.Next(0, 4);
+            } while (wrongIndex == correctIndex);
+
+            string correctColor = generatedCode[correctIndex];
+            UpdateComboBox(wrongIndex, correctColor);
+        }
+
+        // Hint: juiste kleur en juiste plaats
+        private void ShowCorrectColorRightPosition()
+        {
+            Random random = new Random();
+            int correctIndex;
+
+            do
+            {
+                correctIndex = random.Next(0, 4);
+            } while (GetComboBoxValue(correctIndex) == generatedCode[correctIndex]);
+
+            string correctColor = generatedCode[correctIndex];
+            UpdateComboBox(correctIndex, correctColor);
+        }
+
+        // Reset het bord voor de volgende speler (optioneel)
+        private void ResetGameBoard()
+        {
+            ComboBox1.SelectedItem = null;
+            ComboBox2.SelectedItem = null;
+            ComboBox3.SelectedItem = null;
+            ComboBox4.SelectedItem = null;
+        }
+
+        // Haal de waarde van een ComboBox
+        private string GetComboBoxValue(int index)
+        {
+            switch (index)
+            {
+                case 0: return ComboBox1.SelectedItem as string ?? string.Empty;
+                case 1: return ComboBox2.SelectedItem as string ?? string.Empty;
+                case 2: return ComboBox3.SelectedItem as string ?? string.Empty;
+                case 3: return ComboBox4.SelectedItem as string ?? string.Empty;
+                default: return string.Empty;
+            }
+        }
+
+        // Update de waarde van een ComboBox
+        private void UpdateComboBox(int index, string value)
+        {
+            switch (index)
+            {
+                case 0: ComboBox1.SelectedItem = value; break;
+                case 1: ComboBox2.SelectedItem = value; break;
+                case 2: ComboBox3.SelectedItem = value; break;
+                case 3: ComboBox4.SelectedItem = value; break;
+            }
+        }
+
     }
 }
