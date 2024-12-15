@@ -350,6 +350,7 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
             UpdateTitle();  // Ensure the title is correct
         }
 
+
         // Event handler voor 'Aantal pogingen' menu item
         private void MenuAantalPogingen_Click(object sender, RoutedEventArgs e)
         {
