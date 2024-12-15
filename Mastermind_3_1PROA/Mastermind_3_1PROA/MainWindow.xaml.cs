@@ -12,50 +12,46 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
         private string[] generatedCode;
         private int attemptsLeft = 10;
         private int totalPenaltyPoints = 0;
-        private List<string> playerNames = new List<string>(); // Lijst van spelers
-        private int currentPlayerIndex = 0; // Houdt bij wie de huidige speler is
-        private string playerName;  // Naam van de huidige speler
-        private string[] highscores = new string[15]; // Array om de highscores op te slaan
+        private List<string> playerNames = new List<string>();  // List to store multiple player names
+        private int currentPlayerIndex = 0; // To track the current player
+        private string playerName;  // Current player name
+        private string[] highscores = new string[15]; // Array to store high scores
 
         public MainWindow()
         {
             InitializeComponent();
-            playerNames = StartGame();  // Vraag de namen van meerdere spelers
+            playerName = StartGame();  // Get the first player's name
             GenerateRandomCode();
             OpvullenComboBoxes();
             UpdateTitle();
         }
 
-        // Methode om meerdere spelersnamen in te voeren
-        private List<string> StartGame()
+        // Method to start the game and add players
+        private string StartGame()
         {
-            List<string> names = new List<string>();
-            string name;
-
-            do
+            string name = string.Empty;
+            // Add the first player
+            while (true)
             {
-                // Vraag om de naam van de speler
-                name = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Voer de naam van de speler in:",
-                    "Speler Naam",
-                    ""
-                );
-
+                name = Microsoft.VisualBasic.Interaction.InputBox("Voer de naam van de speler in:", "Speler Naam", "");
                 if (!string.IsNullOrEmpty(name))
                 {
-                    names.Add(name);
+                    playerNames.Add(name);  // Add the player's name to the list
+                }
+                else
+                {
+                    MessageBox.Show("Naam mag niet leeg zijn.");
+                    continue;
                 }
 
-                // Vraag of er nog een speler toegevoegd moet worden
-                MessageBoxResult result = MessageBox.Show(
-                    "Wil je nog een speler toevoegen?",
-                    "Nieuwe speler?",
-                    MessageBoxButton.YesNo
-                );
+                var result = MessageBox.Show("Wilt u nog een speler toevoegen?", "Nieuwe speler?", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    break;  // Exit loop when no more players
+                }
             }
-            while (names.Count == 0 || MessageBox.Show("Wil je nog een speler toevoegen?", "Nieuwe speler?", MessageBoxButton.YesNo) == MessageBoxResult.Yes);
 
-            return names;
+            return playerNames[currentPlayerIndex];  // Return the first player
         }
 
         private void GenerateRandomCode()
@@ -76,7 +72,7 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
 
         private void UpdateTitle()
         {
-            this.Title = $"MasterMind - {playerName} - Pogingen over: {attemptsLeft}";
+            this.Title = $"MasterMind - {playerName} - Pogingen over: {attemptsLeft}";  // Show the current player in the title
         }
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -105,7 +101,7 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
         {
             if (attemptsLeft <= 0)
             {
-                ShowEndGameMessage(false);
+                ShowEndGameMessage(false);  // Game over
                 return;
             }
 
@@ -129,8 +125,8 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
 
             if (userCode.SequenceEqual(generatedCode))
             {
-                AddToHighscores(playerName, attemptsLeft, totalPenaltyPoints);
-                ShowEndGameMessage(true);
+                AddToHighscores(playerName, attemptsLeft, totalPenaltyPoints); // Add score to the highscores
+                ShowEndGameMessage(true);  // Game won
                 return;
             }
 
@@ -139,8 +135,8 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
 
             if (attemptsLeft == 0)
             {
-                AddToHighscores(playerName, attemptsLeft, totalPenaltyPoints);
-                ShowEndGameMessage(false);
+                AddToHighscores(playerName, attemptsLeft, totalPenaltyPoints); // Add score to the highscores
+                ShowEndGameMessage(false);  // Game over
             }
         }
 
@@ -220,61 +216,75 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
         private void ShowEndGameMessage(bool isWinner)
         {
             string message;
+
             if (isWinner)
             {
-                message = $"Code is gekraakt in {10 - attemptsLeft} pogingen!\nNu is speler {playerNames[(currentPlayerIndex + 1) % playerNames.Count]} aan de beurt.";
+                // Message for winning
+                message = $"Code is gekraakt in {10 - attemptsLeft} pogingen!\n" +
+                          $"Nu is speler {playerNames[(currentPlayerIndex + 1) % playerNames.Count]} aan de beurt.";
             }
             else
             {
-                message = $"You failed! De correcte code was {string.Join(" ", generatedCode)}.\nNu is speler {playerNames[(currentPlayerIndex + 1) % playerNames.Count]} aan de beurt.";
+                // Message for losing
+                message = $"You failed! De correcte code was {string.Join(" ", generatedCode)}.\n" +
+                          $"Nu is speler {playerNames[(currentPlayerIndex + 1) % playerNames.Count]} aan de beurt.";
             }
 
+            // Show the message in a MessageBox
             MessageBox.Show(message, isWinner ? "Code gekraakt!" : "Game Over", MessageBoxButton.OK);
 
-            // Wissel naar de volgende speler
+            // Switch to the next player
             currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.Count;
-            playerName = playerNames[currentPlayerIndex];  // Zet de naam van de volgende speler
-            UpdateTitle();  // Werk de titel bij met de nieuwe speler
+            playerName = playerNames[currentPlayerIndex];  // Set the next player's name
+            ResetGame();  // Reset the game for the next player
+            UpdateTitle();  // Update the title with the new player
         }
 
         private void ResetGame()
         {
+            // Generate a new random code
             GenerateRandomCode();
-            attemptsLeft = 10;
-            totalPenaltyPoints = 0;
-            UpdateTitle();
 
+            // Reset the attempts to the set value
+            attemptsLeft = 10;  // Or use the dynamically set value
+            totalPenaltyPoints = 0;
+            UpdateTitle();  // Update the title with the new player
+
+            // Reset the ComboBoxes to no selection
             ComboBox1.SelectedItem = null;
             ComboBox2.SelectedItem = null;
             ComboBox3.SelectedItem = null;
             ComboBox4.SelectedItem = null;
 
-            Label1.BorderBrush = Brushes.Transparent;
-            Label2.BorderBrush = Brushes.Transparent;
-            Label3.BorderBrush = Brushes.Transparent;
-            Label4.BorderBrush = Brushes.Transparent;
-
+            // Reset the background color of the labels
             Label1.Background = Brushes.LightGray;
             Label2.Background = Brushes.LightGray;
             Label3.Background = Brushes.LightGray;
             Label4.Background = Brushes.LightGray;
 
+            // Reset the border color of the labels
+            Label1.BorderBrush = Brushes.Transparent;
+            Label2.BorderBrush = Brushes.Transparent;
+            Label3.BorderBrush = Brushes.Transparent;
+            Label4.BorderBrush = Brushes.Transparent;
+
+            // Clear the attempt list
             AttemptsListBox.Items.Clear();
             ScoreLabel.Content = "Score: 0 Strafpunten | Totale strafpunten: 0";
         }
 
-        // Methode om de highscores toe te voegen
+        // Method to add highscores
         private void AddToHighscores(string playerName, int attemptsLeft, int score)
         {
             string newHighscore = $"{playerName} - {10 - attemptsLeft} pogingen - {score / 100.0:F2}";
 
-            // Voeg de nieuwe score toe aan de lijst
+            // Add the new score to the list
             bool added = false;
             for (int i = 0; i < highscores.Length; i++)
             {
                 if (highscores[i] == null || GetScoreValue(highscores[i]) < score)
                 {
-                    // Verschuif de scores naar beneden en voeg de nieuwe score toe
+                    // Shift the scores down and add the new score
                     for (int j = highscores.Length - 1; j > i; j--)
                     {
                         highscores[j] = highscores[j - 1];
@@ -285,22 +295,22 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
                 }
             }
 
-            // Als de highscore is toegevoegd, sla het op in de array
+            // If the highscore was added, show a message
             if (added)
             {
                 MessageBox.Show("Je hebt een nieuwe highscore!");
             }
         }
 
-        // Hulp functie om de score uit de string highscore te halen voor vergelijking
+        // Helper function to get the score value from the highscore string
         private int GetScoreValue(string highscore)
         {
             var scoreString = highscore.Split('-').Last().Trim();
-            var score = scoreString.Split(' ')[0]; // Haal het getal eruit
-            return (int)(double.Parse(score) * 100); // Zet het terug naar een int
+            var score = scoreString.Split(' ')[0]; // Get the number from the score
+            return (int)(double.Parse(score) * 100); // Convert back to an int
         }
 
-        // Methode om de highscores weer te geven
+        // Method to show the highscores
         private void ShowHighscores()
         {
             string highscoresDisplay = "Highscores:\n";
@@ -314,16 +324,30 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
             MessageBox.Show(highscoresDisplay, "Highscores");
         }
 
-        // Event handler voor 'Highscores' menu item
+        // Event handler for 'Highscores' menu item
         private void MenuHighscores_Click(object sender, RoutedEventArgs e)
         {
-            ShowHighscores(); // Weergeven van de highscores
+            ShowHighscores(); // Show the highscores
         }
 
-        // Event handler voor 'Afsluiten' menu item
+        // Event handler for 'Afsluiten' menu item
         private void MenuAfsluiten_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();  // Laat de applicatie sluiten
+            Application.Current.Shutdown();  // Close the application
+        }
+
+        // Event handler for 'Nieuw Spel' menu item
+        private void MenuNieuwSpel_Click(object sender, RoutedEventArgs e)
+        {
+            // Reset the game
+            ResetGame();
+
+            // Ask for the name of the new player
+            playerName = StartGame();  // New player name is set
+            MessageBox.Show($"Een nieuw spel is begonnen voor {playerName}!");  // Optional message
+
+            // Ensure the new player's turn is set
+            UpdateTitle();  // Ensure the title is correct
         }
 
         // Event handler voor 'Aantal pogingen' menu item
@@ -347,15 +371,5 @@ namespace Mastermind_PE_Oguzhan_Yilmaz_1PROA
                 MessageBox.Show("Ongeldig aantal pogingen ingevoerd.", "Fout");
             }
         }
-
-        private void MenuNieuwSpel_Click(object sender, RoutedEventArgs e)
-        {
-            ResetGame();  // Reset het spel
-            playerNames = StartGame();  // Vraag de naam van de speler opnieuw
-            currentPlayerIndex = 0; // Begin met de eerste speler
-            playerName = playerNames[currentPlayerIndex];
-            MessageBox.Show("Een nieuw spel is begonnen!");  // Optioneel bericht
-        }
-
     }
 }
